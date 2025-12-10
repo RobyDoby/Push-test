@@ -1,38 +1,81 @@
-import { useState } from "react"
-import { subscribeUser } from "../utils"
+import { useCallback, useEffect, useState } from 'react'
+import { subscribeUser } from '../utils'
+import type { ScheduledItem } from '../types'
+import { deleteSchedule, fetchScheduled } from '../api'
 
-export const useScheduler = (text: string, time: string) => {
+const BASE = import.meta.env.VITE_BACKEND_PUBLIC_URL
+
+export const useScheduler = (
+  text: string,
+  time: string,
+  setText: React.Dispatch<React.SetStateAction<string>>,
+  setTime: React.Dispatch<React.SetStateAction<string>>
+) => {
+  const [items, setItems] = useState<ScheduledItem[]>([])
   const [subscribed, setSubscribed] = useState(false)
+  const [errorMsg, setErrorMsg] = useState('')
 
   async function enablePush() {
     const subscription = await subscribeUser()
-    if (!subscription) return
-
-    await fetch(`/${process.env.BACKEND_PUBLIC_URL}/subscribe`, {
+    if (!subscription) {
+      setErrorMsg('Ну дай ты разрешение!')
+      return
+    }
+    console.log(subscription)
+    await fetch(`${BASE}/subscribe`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(subscription)
     })
 
+    console.log('Subscribed successfully!')
+    setErrorMsg('')
     setSubscribed(true)
   }
 
   async function schedule() {
+    if (!time || !text) return
+
     const req = {
       text,
       timestamp: new Date(time).getTime()
     }
 
-    await fetch(`/${process.env.BACKEND_PUBLIC_URL}/schedule`, {
+    await fetch(`${BASE}/schedule`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(req)
     })
+    await load()
+    setText('')
+    setTime('')
   }
+
+  const load = useCallback(async () => {
+    const data = await fetchScheduled()
+    setItems(data.sort((a, b) => a.timestamp - b.timestamp))
+  }, [])
+
+  async function onDelete(id: string) {
+    await deleteSchedule(id)
+    setItems((s) => s.filter((i) => i.id !== id))
+  }
+
+  useEffect(() => {
+    // weird react behaviour
+    const timer = setTimeout(() => {
+      load()
+    }, 0)
+
+    return () => clearTimeout(timer)
+  }, [load])
 
   return {
     schedule,
     enablePush,
-    subscribed
+    subscribed,
+    items,
+    onDelete,
+    errorMsg
   }
 }

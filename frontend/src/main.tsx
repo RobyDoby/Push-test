@@ -10,5 +10,8 @@ createRoot(document.getElementById('root')!).render(
 )
 
 if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("/sw.js");
+  navigator.serviceWorker.register("/sw.js", {
+    updateViaCache: 'none',
+    scope: '/'
+  }).then(() => console.log('SW registered'));
 }
