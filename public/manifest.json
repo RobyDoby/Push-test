@@ -9,7 +9,8 @@
       "purpose": "any"
     }
   ],
-  "start_url": "/",
+  "start_url": "/Push-test/",
+  "scope": "/Push-test/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#000000"
