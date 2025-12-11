@@ -62,12 +62,7 @@ export const useScheduler = (
   }
 
   useEffect(() => {
-    // weird react behaviour
-    const timer = setTimeout(() => {
       load()
-    }, 0)
-
-    return () => clearTimeout(timer)
   }, [load])
 
   return {

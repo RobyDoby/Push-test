@@ -1,6 +1,7 @@
 import './App.css'
 import { useScheduler } from './hooks/useScheduler'
 import { useUserInput } from './hooks/useUserInput'
+import { InstallPWABtn } from './InstallPWABtn'
 import ScheduleList from './SchedulesList'
 
 function App() {
@@ -12,6 +13,7 @@ function App() {
       <h1>Push Demo</h1>
       {errorMsg && <p>{errorMsg}</p>}
       <button onClick={enablePush}>Разрешить уведомления</button>
+      <InstallPWABtn />
       {subscribed && <p>Подписка успешно сохранена</p>}
 
       <input
